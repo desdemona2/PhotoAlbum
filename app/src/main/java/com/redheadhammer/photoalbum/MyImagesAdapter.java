@@ -1,5 +1,6 @@
 package com.redheadhammer.photoalbum;
 
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,10 @@ public class MyImagesAdapter extends RecyclerView.Adapter<MyImagesAdapter.MyView
 
     private List<MyImages> allImages = new ArrayList<>();
 
+    public MyImages getImageAtPosition(int position) {
+        return allImages.get(position);
+    }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -28,7 +33,15 @@ public class MyImagesAdapter extends RecyclerView.Adapter<MyImagesAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-//        holder.imageView.set
+        MyImages myImage = allImages.get(position);
+
+        holder.title.setText(myImage.getImageTitle());
+        holder.description.setText(myImage.getImageDescription());
+
+        // decode array will take byte array, starting index (starting point for image decoding)
+        // and ending index to end decoding image.
+        holder.imageView.setImageBitmap(BitmapFactory.decodeByteArray(myImage.getImage(), 0,
+                myImage.getImage().length));
     }
 
     @Override

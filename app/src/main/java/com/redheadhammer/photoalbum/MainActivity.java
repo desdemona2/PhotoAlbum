@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MyImagesViewModel viewModel;
     private ActivityResultLauncher<Intent> addImageLauncher;
+    private ActivityResultLauncher<Intent> updateLauncher;
+    MyImagesAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,9 +34,11 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        MyImagesAdapter adapter = new MyImagesAdapter();
+        adapter = new MyImagesAdapter();
         binding.recycler.setLayoutManager(new LinearLayoutManager(this));
         binding.recycler.setAdapter(adapter);
+
+        adapterOnClickListener();
 
         viewModel = new ViewModelProvider(this).get(MyImagesViewModel.class);
 
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         registerResultActivity();
+        setUpdateLauncher();
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
@@ -83,6 +88,54 @@ public class MainActivity extends AppCompatActivity {
                             String description = data.getStringExtra("DESCRIPTION");
 
                             viewModel.insert(new MyImages(title, description, image));
+                        }
+                    }
+                });
+    }
+
+    private void adapterOnClickListener() {
+        adapter.setOnItemClickListener(new MyImagesAdapter.OnItemClickListener() {
+            @Override
+            public void OnItemClick(int position) {
+                MyImages image = adapter.getImageAtPosition(position);
+                String title = image.getImageTitle();
+                String description = image.getImageDescription();
+                byte[] imageV = image.getImage();
+                int imageId = image.getImageId();
+
+                Intent intent = new Intent(MainActivity.this, UpdateImageActivity.class);
+                intent.putExtra("TITLE", title);
+                intent.putExtra("DESCRIPTION", description);
+                intent.putExtra("IMAGE", imageV);
+                intent.putExtra("IMAGE_ID", imageId);
+
+                updateLauncher.launch(intent);
+
+            }
+        });
+    }
+
+    private void setUpdateLauncher() {
+        updateLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        int resultCode = result.getResultCode();
+                        Intent data = result.getData();
+
+                        if (resultCode == RESULT_OK && data != null) {
+                            byte[] image = data.getByteArrayExtra("IMAGE");
+                            String title = data.getStringExtra("TITLE");
+                            String description = data.getStringExtra("DESCRIPTION");
+                            int imageId = data.getIntExtra("IMAGE_ID", -1);
+
+                            MyImages myImage = new MyImages(title, description, image);
+
+                            viewModel.delete(myImage);
+
+                            myImage.setImageId(imageId);
+
+                            viewModel.insert(myImage);
                         }
                     }
                 });

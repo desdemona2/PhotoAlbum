@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class MyImagesAdapter extends RecyclerView.Adapter<MyImagesAdapter.MyViewHolder> {
 
     private List<MyImages> allImages = new ArrayList<>();
-
+    private OnItemClickListener onItemClickListener;
     public MyImages getImageAtPosition(int position) {
         return allImages.get(position);
     }
@@ -57,10 +58,23 @@ public class MyImagesAdapter extends RecyclerView.Adapter<MyImagesAdapter.MyView
             imageView = itemView.findViewById(R.id.imageView);
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
+
+            itemView.setOnClickListener(this::clickView);
+        }
+        public void clickView(View view) {
+            onItemClickListener.OnItemClick(getAdapterPosition());
         }
     }
 
     public void setImageList(List<MyImages> myImagesList) {
         this.allImages = myImagesList;
+    }
+
+    public interface OnItemClickListener {
+        void OnItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener clickListener){
+        this.onItemClickListener = clickListener;
     }
 }

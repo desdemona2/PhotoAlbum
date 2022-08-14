@@ -103,9 +103,6 @@ public class AddImageActivity extends AppCompatActivity {
                                         "Failed to select Image",
                                         Toast.LENGTH_SHORT).show();
                             }
-
-
-
                         }
                     }
                 }
